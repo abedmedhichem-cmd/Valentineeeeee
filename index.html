@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ma Valentine 💖</title>
 
@@ -11,9 +11,10 @@ body{
   font-family:Arial, sans-serif;
   background:#ffe6f0;
   text-align:center;
+  overflow-x:hidden;
 }
 
-/* écran centré */
+/* écrans centrés */
 .screen{
   position:fixed;
   inset:0;
@@ -39,7 +40,7 @@ button{
 #yes{background:#ff4d88;color:#fff;margin-right:10px;}
 #no{background:#ccc;}
 
-/* page principale cachée au début */
+/* PAGE PRINCIPALE */
 #main{display:none;padding:40px 15px;}
 
 #slideshow{
@@ -50,7 +51,7 @@ button{
   display:block;
 }
 
-/* cœurs */
+/* CŒURS */
 .heart{
   position:fixed;
   font-size:32px;
@@ -62,17 +63,68 @@ button{
   to{transform:translateY(110vh);opacity:0;}
 }
 
-/* écran final */
+/* ÉCRAN FINAL */
 #final{
   display:none;
-  background:rgba(255,230,240,.95);
+  background:rgba(255,230,240,.97);
   z-index:9999;
 }
-
 #final h2{
-  font-size:42px;
+  font-size:38px;
   color:#ff0066;
   margin:0;
+  padding:0 14px;
+}
+
+/* ===== BATTLE ===== */
+
+.battleBox{
+  width:min(560px,95vw);
+  background:#fff;
+  border-radius:18px;
+  padding:18px 16px;
+  box-shadow:0 15px 35px rgba(0,0,0,.15);
+}
+
+.row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:12px 0;
+}
+
+.avatar{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #ffd1e2;
+}
+
+.barWrap{flex:1;text-align:left;}
+.label{font-size:14px;color:#7a2a42;margin-bottom:6px;}
+
+.bar{
+  height:16px;
+  background:#ffe6f0;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.fill{
+  height:100%;
+  width:0%;
+  background:#ff7aa8;
+  border-radius:999px;
+  transition:width .12s linear;
+}
+
+.fill.win{background:#ff2f74;}
+
+.pct{
+  width:48px;
+  font-weight:bold;
+  color:#7a2a42;
 }
 </style>
 </head>
@@ -86,11 +138,44 @@ button{
   <button id="startBtn">▶️ Musique</button>
 </div>
 
+<!-- ÉCRAN BATTLE -->
+<div id="battle" class="screen" style="display:none;">
+  <h1>Petit duel… 😈💖</h1>
+
+  <div class="battleBox">
+
+    <div class="row">
+      <img class="avatar" src="me.jpg" alt="Moi">
+      <div class="barWrap">
+        <div class="label">Moi</div>
+        <div class="bar">
+          <div id="barMe" class="fill"></div>
+        </div>
+      </div>
+      <div id="pctMe" class="pct">0%</div>
+    </div>
+
+    <div class="row">
+      <img class="avatar" src="elle.jpg" alt="Elle">
+      <div class="barWrap">
+        <div class="label">Toi</div>
+        <div class="bar">
+          <div id="barHer" class="fill win"></div>
+        </div>
+      </div>
+      <div id="pctHer" class="pct">0%</div>
+    </div>
+
+  </div>
+
+  <p id="battleMsg" style="margin-top:18px;font-weight:bold;"></p>
+</div>
+
 <!-- PAGE SAINT-VALENTIN -->
 <div id="main">
   <h1>Est-ce que tu veux être ma Valentine ? 💌</h1>
 
-  <img id="slideshow" src="1.jpg?v=7" alt="Nous 💖">
+  <img id="slideshow" src="1.jpg" alt="Nous 💖">
 
   <div>
     <button id="yes">Oui ❤️</button>
@@ -98,7 +183,7 @@ button{
   </div>
 </div>
 
-<audio id="bgm" src="music.mp3?v=7" loop preload="auto"></audio>
+<audio id="bgm" src="music.mp3" loop></audio>
 
 <!-- ÉCRAN FINAL -->
 <div id="final" class="screen">
@@ -108,31 +193,66 @@ button{
 <script>
 const intro = document.getElementById("intro");
 const main  = document.getElementById("main");
+const battle = document.getElementById("battle");
 const bgm   = document.getElementById("bgm");
 const finalEl = document.getElementById("final");
 
-/* afficher la page principale */
-function showMain(){
+/* ===== BATTLE ===== */
+
+function showBattle(){
   intro.style.display = "none";
-  main.style.display = "block";
+  battle.style.display = "flex";
+}
+
+function startBattle(){
+  const barMe  = document.getElementById("barMe");
+  const barHer = document.getElementById("barHer");
+  const pctMe  = document.getElementById("pctMe");
+  const pctHer = document.getElementById("pctHer");
+  const msg    = document.getElementById("battleMsg");
+
+  let me = 0;
+  let her = 0;
+
+  const targetMe = 92;
+  const targetHer = 100;
+
+  const timer = setInterval(() => {
+
+    if(me < targetMe) me += 2;
+    if(her < targetHer) her += 3;
+
+    if(me > targetMe) me = targetMe;
+    if(her > targetHer) her = targetHer;
+
+    barMe.style.width = me + "%";
+    barHer.style.width = her + "%";
+    pctMe.textContent = me + "%";
+    pctHer.textContent = her + "%";
+
+    if(me === targetMe && her === targetHer){
+      clearInterval(timer);
+      msg.textContent = "Comme d’habitude tu gagnes toujours !!!! 💖";
+
+      setTimeout(() => {
+        battle.style.display = "none";
+        main.style.display = "block";
+      }, 1800);
+    }
+
+  }, 60);
 }
 
 /* clic musique */
 document.getElementById("startBtn").onclick = async () => {
-  showMain();
+  showBattle();
   try { await bgm.play(); } catch(e) {}
+  startBattle();
 };
 
-/* diaporama 6 photos */
-const photos = [
-  "1.jpg?v=7",
-  "2.jpg?v=7",
-  "3.jpg?v=7",
-  "4.jpg?v=7",
-  "5.jpg?v=7",
-  "6.jpg?v=7"
-];
+/* ===== DIAPORAMA ===== */
 
+const photos = ["1.jpg","2.jpg","3.jpg","4.jpg","5.jpg","6.jpg"];
 let idx = 0;
 const img = document.getElementById("slideshow");
 
@@ -141,7 +261,8 @@ setInterval(() => {
   img.src = photos[idx];
 }, 2200);
 
-/* pluie de cœurs */
+/* ===== CŒURS ===== */
+
 function hearts(){
   for(let i=0;i<90;i++){
     const h=document.createElement("div");
@@ -153,20 +274,25 @@ function hearts(){
   }
 }
 
-/* bouton OUI */
+/* ===== BOUTONS ===== */
+
 document.getElementById("yes").onclick = async () => {
   try { await bgm.play(); } catch(e) {}
   hearts();
-  setTimeout(()=>{ finalEl.style.display="flex"; }, 450);
+  setTimeout(()=>{ finalEl.style.display="flex"; }, 400);
 };
 
-/* bouton NON qui fuit */
 const noBtn = document.getElementById("no");
-noBtn.onmouseenter = () => {
+
+function moveNo(){
   noBtn.style.position="relative";
   noBtn.style.left=(Math.random()*120-60)+"px";
   noBtn.style.top =(Math.random()*80-40)+"px";
-};
+}
+
+noBtn.onmouseenter = moveNo;
+noBtn.ontouchstart = moveNo;
+
 noBtn.onclick = (e) => { e.target.style.display="none"; };
 </script>
 
