@@ -1,112 +1,160 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ma Valentine 💖</title>
-
 <style>
-body {
-  background: #ffe6f0;
-  font-family: Arial, sans-serif;
-  text-align: center;
-  margin-top: 80px;
-}
-
-h1 {
-  color: #ff3366;
-}
-
-img {
-  width: 260px;
-  border-radius: 18px;
-  box-shadow: 0 10px 25px rgba(0,0,0,.15);
-  margin-top: 20px;
-}
-
-button {
-  font-size: 20px;
-  padding: 12px 25px;
-  margin: 12px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-#yes { background-color: #ff4d88; color: white; }
-#no { background-color: #cccccc; }
-#musicBtn { background:#fff0f6; }
-
-.heart {
-  position: fixed;
-  color: red;
-  font-size: 30px;
-  animation: fall 2s linear forwards;
-}
-
-@keyframes fall {
-  from { transform: translateY(-50px); opacity: 1; }
-  to { transform: translateY(100vh); opacity: 0; }
-}
+  body{
+    background:#ffe6f0;
+    font-family: Arial, sans-serif;
+    text-align:center;
+    margin:0;
+    padding:60px 16px;
+  }
+  h1{color:#ff3366; margin:0 0 14px;}
+  .sub{color:#ff6b93; margin:0 0 18px;}
+  #wrap{max-width:520px; margin:0 auto;}
+  #slideshow{
+    width:min(320px, 85vw);
+    border-radius:18px;
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+    margin:14px 0 6px;
+    display:block;
+    margin-left:auto; margin-right:auto;
+    background:#fff;
+  }
+  #imgHint{font-size:14px; color:#c04a6b; min-height:18px; margin:8px 0 0;}
+  .btn{
+    font-size:18px;
+    padding:12px 22px;
+    margin:10px 8px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+  }
+  #yes{background:#ff4d88; color:#fff;}
+  #no{background:#ccc;}
+  #status{margin-top:10px; font-size:14px; color:#7a2a42; min-height:18px;}
+  .heart{
+    position:fixed;
+    font-size:30px;
+    animation:fall 2.2s linear forwards;
+    pointer-events:none;
+  }
+  @keyframes fall{
+    from{transform:translateY(-60px); opacity:1;}
+    to{transform:translateY(110vh); opacity:0;}
+  }
+  /* écran final */
+  #final{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,230,240,.92);
+    backdrop-filter: blur(2px);
+    z-index:9999;
+    padding:24px;
+  }
+  #finalCard{
+    background:#fff;
+    border-radius:18px;
+    padding:22px 18px;
+    box-shadow:0 18px 40px rgba(0,0,0,.18);
+    max-width:520px;
+    width:100%;
+  }
+  #finalCard h2{margin:0 0 10px; color:#ff3366;}
+  #finalCard p{margin:0; color:#7a2a42; line-height:1.35;}
 </style>
 </head>
 
 <body>
+  <div id="wrap">
+    <h1>Est-ce que tu veux être ma Valentine ? 💌</h1>
+    <p class="sub">Clique sur “Oui” 👀</p>
 
-<h1>Est-ce que tu veux être ma Valentine ? 💌</h1>
+    <img id="slideshow" src="1.jpg" alt="Nous 💖">
+    <div id="imgHint"></div>
 
-<!-- PHOTO -->
-<img id="slideshow" src="1.jpg" alt="Nous 💖">
+    <div>
+      <button class="btn" id="yes">Oui ❤️</button>
+      <button class="btn" id="no">Non 😢</button>
+    </div>
 
-<br>
+    <div id="status"></div>
+    <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
+  </div>
 
-<button id="yes">Oui ❤️</button>
-<button id="no">Non 😢</button>
-<br>
-<button id="musicBtn">▶️ Musique</button>
-
-<audio id="bgm" src="music.mp3" loop></audio>
+  <div id="final">
+    <div id="finalCard">
+      <h2>YEEEES 😭💖</h2>
+      <p>
+        Même à distance, je te choisis.<br>
+        Merci d’être toi. ❤️
+      </p>
+    </div>
+  </div>
 
 <script>
-/* 🎵 musique */
-const bgm = document.getElementById("bgm");
-const musicBtn = document.getElementById("musicBtn");
+  const bgm = document.getElementById("bgm");
+  const statusEl = document.getElementById("status");
+  const finalEl = document.getElementById("final");
+  const imgHint = document.getElementById("imgHint");
+  const slideshow = document.getElementById("slideshow");
 
-musicBtn.onclick = async () => {
-  if (bgm.paused) {
-    await bgm.play();
-    musicBtn.textContent = "⏸️ Pause";
-  } else {
-    bgm.pause();
-    musicBtn.textContent = "▶️ Musique";
+  // ✅ diaporama
+  const photos = ["1.jpg","2.jpg","3.jpg"];
+  let idx = 0;
+  setInterval(() => {
+    idx = (idx + 1) % photos.length;
+    slideshow.src = photos[idx];
+  }, 2200);
+
+  // ✅ si une photo n’existe pas, on affiche un message
+  slideshow.onerror = () => {
+    imgHint.textContent =
+      "⚠️ Photo introuvable. Vérifie les noms: 1.jpg 2.jpg 3.jpg (sans majuscules).";
+  };
+  slideshow.onload = () => { imgHint.textContent = ""; };
+
+  // 💖 pluie de cœurs
+  function heartsBurst(count=60){
+    for(let i=0;i<count;i++){
+      const h=document.createElement("div");
+      h.className="heart";
+      h.style.left=(Math.random()*100)+"vw";
+      h.style.top=(-20 - Math.random()*80)+"px";
+      h.textContent = Math.random() < 0.15 ? "💗" : "❤️";
+      document.body.appendChild(h);
+      setTimeout(()=>h.remove(), 2300);
+    }
   }
-};
 
-/* 📸 diaporama */
-const photos = ["1.jpg","2.jpg","3.jpg"];
-let idx = 0;
-setInterval(() => {
-  idx = (idx + 1) % photos.length;
-  document.getElementById("slideshow").src = photos[idx];
-}, 2500);
-
-/* ❤️ bouton oui */
-document.getElementById("yes").onclick = () => {
-  bgm.play(); // lance la musique
-  for (let i = 0; i < 40; i++) {
-    let heart = document.createElement("div");
-    heart.className = "heart";
-    heart.style.left = Math.random() * 100 + "vw";
-    heart.innerText = "❤️";
-    document.body.appendChild(heart);
-    setTimeout(() => heart.remove(), 2000);
+  // 🎵 démarrer musique (après clic)
+  async function startMusic(){
+    try{
+      await bgm.play();
+      statusEl.textContent = "🎵 Musique en cours…";
+    }catch(e){
+      statusEl.textContent = "🎵 Clique encore une fois pour lancer la musique (certains navigateurs sont relous).";
+    }
   }
-};
 
-/* 😢 bouton non */
-document.getElementById("no").onclick = (e) => {
-  e.target.style.display = "none";
-};
-</script>
+  // ✅ OUI = musique + animation + écran final
+  document.getElementById("yes").onclick = async () => {
+    await startMusic();
+    heartsBurst(90);
+    setTimeout(()=>{ finalEl.style.display="flex"; }, 600);
+  };
 
-</body>
-</html>
+  // ✅ NON = bouton s’enfuit + disparaît
+  const noBtn = document.getElementById("no");
+  noBtn.onmouseenter = () => {
+    noBtn.style.position = "relative";
+    noBtn.style.left = (Math.random()*120 - 60) + "px";
+    noBtn.style.top  = (Math.random()*80  - 40) + "px";
+  };
+  no
