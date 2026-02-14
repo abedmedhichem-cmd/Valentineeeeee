@@ -90,7 +90,7 @@ button{
 <div id="main">
   <h1>Est-ce que tu veux être ma Valentine ? 💌</h1>
 
-  <img id="slideshow" src="1.jpg?v=5" alt="Nous 💖">
+  <img id="slideshow" src="1.jpg?v=7" alt="Nous 💖">
 
   <div>
     <button id="yes">Oui ❤️</button>
@@ -98,7 +98,7 @@ button{
   </div>
 </div>
 
-<audio id="bgm" src="music.mp3?v=5" loop preload="auto"></audio>
+<audio id="bgm" src="music.mp3?v=7" loop preload="auto"></audio>
 
 <!-- ÉCRAN FINAL -->
 <div id="final" class="screen">
@@ -123,8 +123,16 @@ document.getElementById("startBtn").onclick = async () => {
   try { await bgm.play(); } catch(e) {}
 };
 
-/* diaporama */
-const photos = ["1.jpg?v=5","2.jpg?v=5","3.jpg?v=5"];
+/* diaporama 6 photos */
+const photos = [
+  "1.jpg?v=7",
+  "2.jpg?v=7",
+  "3.jpg?v=7",
+  "4.jpg?v=7",
+  "5.jpg?v=7",
+  "6.jpg?v=7"
+];
+
 let idx = 0;
 const img = document.getElementById("slideshow");
 
